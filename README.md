@@ -1,10 +1,14 @@
-# Projecto-Mobility
-Challenge in Modeling of Multi-Agent Systems with Computer Graphics 
+# Project-Mobility
+Challenge for Modeling of Multi-Agent Systems with Computer Graphics 
 
-Members: 
+**Members:** 
 - Nicolas Casillas Larrañaga | A01787292
 - Paulina Cortez Balvanera | A01782041
 
-Professors
+**Professors:**
 - Gilberto Echeverría Furió	
 - Marcial Roberto Leyva Fernández
+
+
+**Description:**
+a
