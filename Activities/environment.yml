@@ -1,0 +1,15 @@
+name : tc2008b
+channels:
+ - conda-forge
+ - pip
+dependencies :
+ - python==3.14.3
+ - mesa==3.5.1
+ - imageio
+ - pip :
+    - flask==3.1.3
+    - pandas
+    - matplotlib
+    - tqdm
+    - PyYAML>=6.0
+    - numpy
