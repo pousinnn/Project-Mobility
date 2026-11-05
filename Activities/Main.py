@@ -10,6 +10,8 @@ def main():
 	subparser.add_argument("--File", required = False, default = "out.gif", type = str, help = "Output file");
 	subparser.add_argument("--GridSize", required = False, default = 50, type = int, help = "Grid Size");
 	subparser.add_argument("--FPS", required = False, default = 5, type = int, help = "Frames Per Second");	
+	subparser.add_argument("--Density", required = False, default = 0.5, type = float, help = "Density Uniform Distribution");	
+
 	subparser.set_defaults(func = LIB_Automata.Automata2GIFF);
 
 	Options = parser.parse_args();
