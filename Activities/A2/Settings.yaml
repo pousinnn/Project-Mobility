@@ -1,0 +1,12 @@
+# Multi-agent grid settings
+GridSize: [10, 10]   # columns, rows
+NA: 2
+NB: 6
+NC: 15
+A_speed: 3           # cells per second while moving
+B_speed: 2
+A_file: "./IMG/A.png"
+B_file: "./IMG/B.png"
+C_file: "./IMG/C.png"
+t_new: 5            # seconds between new C agents
+t_hold: 1            # seconds A and B rest in a cell

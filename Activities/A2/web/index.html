@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-agent grid</title>
+<style>
+  html,body{margin:0;height:100%;background:#14181f;color:#dfe6ee;font:14px system-ui,sans-serif}
+  body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  canvas{width:min(92vw,80vh);aspect-ratio:1;background:#1d232d;border-radius:4px}
+  #hud{display:flex;gap:20px}
+  #hud span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;background:var(--c)}
+</style></head>
+<body>
+<canvas id="gl" width="800" height="800"></canvas>
+<div id="hud"><span style="--c:#2878e6">A: <b id="nA">0</b></span><span style="--c:#e13c3c">B: <b id="nB">0</b></span><span style="--c:#28aa5a">C: <b id="nC">0</b></span></div>
+<script>
+const canvas = document.getElementById('gl');
+const gl = canvas.getContext('webgl', {premultipliedAlpha: true});
+const vs = `attribute vec2 a_pos; uniform vec2 u_off, u_grid; uniform float u_scale, u_pad; varying vec2 v_uv;
+void main(){ v_uv = a_pos; vec2 p = (u_off + a_pos*u_scale + u_pad)/u_grid;
+  gl_Position = vec4(p.x*2.0-1.0, 1.0-p.y*2.0, 0, 1); }`;
+const fs = `precision mediump float; varying vec2 v_uv; uniform sampler2D u_tex; uniform vec4 u_color; uniform bool u_useTex;
+void main(){ gl_FragColor = u_useTex ? texture2D(u_tex, v_uv) : u_color; }`;
+function sh(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s); return s; }
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+gl.linkProgram(prog); gl.useProgram(prog);
+const U = n => gl.getUniformLocation(prog, n);
+const uScale = U('u_scale'), uPad = U('u_pad'), uOff = U('u_off'), uGrid = U('u_grid'), uTex = U('u_tex'), uColor = U('u_color'), uUse = U('u_useTex');
+gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+const quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 1,1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, 'a_pos'); gl.enableVertexAttribArray(loc);
+
+function makeTexture(url, fallback){
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(fallback));
+  const img = new Image();
+  img.onload = () => { gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); };
+  img.onerror = () => console.warn('Could not load image', url);
+  img.src = '/' + url.replace(/^\.\//, '');
+  for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR],
+                        [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]])
+    gl.texParameteri(gl.TEXTURE_2D, p, v);
+  return tex;
+}
+
+(async () => {
+  const cfg = await (await fetch('/config')).json();
+  const [W, H] = cfg.grid;
+  const tex = {A: makeTexture(cfg.files.A, [40,120,230,255]), B: makeTexture(cfg.files.B, [225,60,60,255]),
+               C: makeTexture(cfg.files.C, [40,170,90,255])};
+  // grid lines
+  const lines = []; for (let i = 0; i <= W; i++) lines.push(i,0, i,H); for (let j = 0; j <= H; j++) lines.push(0,j, W,j);
+  const lineBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, lineBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+  const nLine = lines.length / 2;
+
+  let agents = [];
+  async function poll(){ try { agents = (await (await fetch('/state')).json()).agents; } catch(e){} setTimeout(poll, 33); }
+  poll();
+
+  function draw(){
+    gl.viewport(0, 0, canvas.width, canvas.height); gl.clearColor(0.114, 0.137, 0.176, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(uGrid, W, H);
+    gl.bindBuffer(gl.ARRAY_BUFFER, lineBuf); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1i(uUse, 0); gl.uniform4f(uColor, 0.27, 0.32, 0.4, 1);
+    gl.uniform1f(uScale, 1); gl.uniform1f(uPad, 0); gl.uniform2f(uOff, 0, 0);
+    gl.drawArrays(gl.LINES, 0, nLine);
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1i(uUse, 1); gl.uniform1i(uTex, 0); gl.uniform1f(uScale, 0.84); gl.uniform1f(uPad, 0.08); gl.activeTexture(gl.TEXTURE0);
+    const n = {A:0, B:0, C:0};
+    for (const a of agents){ n[a.t]++; gl.bindTexture(gl.TEXTURE_2D, tex[a.t]); gl.uniform2f(uOff, a.x, a.y);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
+    for (const t of 'ABC') document.getElementById('n'+t).textContent = n[t];
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+</script></body></html>
