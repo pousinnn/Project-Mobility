@@ -1,20 +1,17 @@
-# Main.py
-import LIB # estimacion de pose
+import LIB
 import argparse
 import datetime
 
 def main():
 	parser = argparse.ArgumentParser("A3", description = "A3 for TC2008b");
-	subparsers = parser.add_subparsers(dest = "cmd");
+	subparsers = parser.add_subparsers();
 	
-	subparser = subparsers.add_parser("Sim",  description = "This command runs the simulation");
+	subparser = subparsers.add_parser("Sim",  description = "Runs the simulation");
 	subparser.add_argument("--Split", default = 0.8, type = float, help = "Train/Validation proportion");
 	subparser.set_defaults(func = LIB.Sim);
 
-
-	subparser = subparsers.add_parser("Parameters",  description = "Generates the dataset");
-	subparser.add_argument("--File", required = True, type = str, help = "CSV file comprising the landmarks");
-	subparser.add_argument("--Folder", required = True, type = str, help = "CSV file comprising the landmarks");	
+	subparser = subparsers.add_parser("Parameters",  description = "Runs the paramenters");
+	subparser.add_argument("--Agents", default = 1, type = int, help = "Number of agents");
 	subparser.set_defaults(func = LIB.Parameters);
 
 	Options = parser.parse_args();
