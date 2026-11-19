@@ -1,4 +1,4 @@
-import csv, ast, flask, pandas
+import csv, ast, pandas
 from pathlib import Path
 
 app = flask.Flask(__name__)

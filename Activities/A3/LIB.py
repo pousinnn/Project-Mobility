@@ -1,4 +1,4 @@
-import csv, ast, flask
+import csv, ast, flask, pandas
 from pathlib import Path
 
 app = flask.Flask(__name__)
@@ -32,11 +32,17 @@ def index():
 def data():
     return flask.jsonify({"nodes": load_nodes(), "routes": load_routes()})
 
-def Parameters(Options):
-    print("Hello World")
-
-def Sim(Options):
+if __name__ == "__main__":
     app.run(debug=True)
 
-if __name__ == "__main__":
+def Parameters(Options):
+    print(Options.Agents)
+    DF=pandas.DataFrame()
+    DF.to_csv("NodesNew.csv",index=False)
+
+    #Todo
+    #for a in range(Options.Agents):
+    #add rows to your DF structure
+
+def Sim(options):  #python Main.py Sim
     app.run(debug=True)
