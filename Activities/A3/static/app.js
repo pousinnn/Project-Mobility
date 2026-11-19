@@ -228,8 +228,8 @@ async function start() {
   makeAgents();
 
   [robotTex,fullTex,emptyTex]=await Promise.all([
-    createTexture("/static/images/robot.png"),
-    createTexture("/static/images/node_full.png"),
+    createTexture("/static/images/Boombot.png"),
+    createTexture("/static/images/smoke.png"),
     createTexture("/static/images/node_empty.png")
   ]);
 
