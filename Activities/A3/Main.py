@@ -1,26 +1,21 @@
 # Main.py
-import MiModule_1 # estimacion de pose
-import MiModule_2 # graficacion
+import LIB # estimacion de pose
 import argparse
 import datetime
 
 def main():
-	parser = argparse.ArgumentParser("Human traits", description = "This code generates a folder tree to classify human traits");
+	parser = argparse.ArgumentParser("A3", description = "A3 for TC2008b");
 	subparsers = parser.add_subparsers(dest = "cmd");
 	
-	subparser = subparsers.add_parser("GenDataset",  description = "Generates the dataset");
-	subparser.add_argument("--File", required = True, type = str, help = "CSV file comprising the landmarks");
-	subparser.add_argument("--SPath", required = True,type = str, help = "Source images path");
-	subparser.add_argument("--TPath", required = True,type = str, help = "Target traits path");
+	subparser = subparsers.add_parser("Sim",  description = "This command runs the simulation");
 	subparser.add_argument("--Split", default = 0.8, type = float, help = "Train/Validation proportion");
-	subparser.add_argument("--save_file", action = "store_true");
-	subparser.set_defaults(func = MiModule_1.GenDataset);
+	subparser.set_defaults(func = LIB.Sim);
 
 
-	subparser = subparsers.add_parser("Plots",  description = "Generates the dataset");
+	subparser = subparsers.add_parser("Parameters",  description = "Generates the dataset");
 	subparser.add_argument("--File", required = True, type = str, help = "CSV file comprising the landmarks");
 	subparser.add_argument("--Folder", required = True, type = str, help = "CSV file comprising the landmarks");	
-	subparser.set_defaults(func = MiModule_2.Plots);
+	subparser.set_defaults(func = LIB.Parameters);
 
 	Options = parser.parse_args();
 	

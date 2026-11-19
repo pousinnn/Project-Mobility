@@ -32,5 +32,11 @@ def index():
 def data():
     return flask.jsonify({"nodes": load_nodes(), "routes": load_routes()})
 
+def Parameters(Options):
+    print("Hello World")
+
+def Sim(Options):
+    app.run(debug=True)
+
 if __name__ == "__main__":
     app.run(debug=True)
