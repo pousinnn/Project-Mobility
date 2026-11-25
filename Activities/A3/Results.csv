@@ -1,0 +1,2 @@
+M,N,Agents,Trajectory,DirtyPct,LockedPct,MaxTime,Start,Seed,FreeCells,DirtyCells,LockedCells,Steps,TimeToClean,AllCleaned,VisitedPct,CleanedPct,TotalMovements,MovementsPerAgent
+8,8,4,random,25.0,10.0,300,0,1,58,14,6,90,90,1,91.38,100.0,360,90.0
